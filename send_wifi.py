@@ -1,31 +1,41 @@
 #!/usr/bin/env python3
 # send_wifi.py — send text to Logitext keyboard over WiFi
 # Usage: python3 send_wifi.py "hello world"
+#        python3 send_wifi.py --clip        (send clipboard contents)
 
 import sys
-import urllib.request
 import urllib.parse
+import subprocess
 
 PICO_IP = "auto"   # set to Pico's IP if auto-detect fails e.g. "192.168.1.42"
 
 def find_pico_ip():
-    # Try common IPs if auto not set
-    import socket
     if PICO_IP != "auto":
         return PICO_IP
-    # Read from .pico_ip cache if saved
     try:
         with open(".pico_ip") as f:
             return f.read().strip()
     except:
-        print("No cached IP. Run: python3 find_pico.py  OR set PICO_IP in send_wifi.py")
+        print("No cached IP. Set PICO_IP in send_wifi.py or save IP to .pico_ip")
         sys.exit(1)
+
+def get_clipboard():
+    result = subprocess.run(["pbpaste"], capture_output=True, text=True)
+    return result.stdout
 
 if len(sys.argv) < 2:
     print('Usage: python3 send_wifi.py "text to type"')
+    print('       python3 send_wifi.py --clip')
     sys.exit(1)
 
-text = sys.argv[1]
+if sys.argv[1] == "--clip":
+    text = get_clipboard()
+    if not text:
+        print("Clipboard is empty.")
+        sys.exit(1)
+    print(f"Clipboard: {text!r}")
+else:
+    text = sys.argv[1]
 ip   = find_pico_ip()
 url  = f"http://{ip}/type"
 data = urllib.parse.urlencode({"text": text}).encode()
@@ -42,7 +52,9 @@ try:
         f"Connection: close\r\n"
         f"\r\n"
     ).encode() + body
-    s = socket.create_connection((ip, 80), timeout=5)
+    timeout = 120 if sys.argv[1] == "--clip" else 10
+    s = socket.create_connection((ip, 80), timeout=timeout)
+    s.settimeout(timeout)
     s.sendall(request)
     response = b""
     while True:
