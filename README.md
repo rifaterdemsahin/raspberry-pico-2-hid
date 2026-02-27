@@ -1,5 +1,7 @@
 # Logitext — Raspberry Pi Pico 2 W WiFi Keyboard Bridge
 
+🌐 **[Live Site → rifaterdemsahin.github.io/raspberry-pico-2-hid](https://rifaterdemsahin.github.io/raspberry-pico-2-hid/)**
+
 Send text from your Mac to a Windows PC over WiFi using a Raspberry Pi Pico 2 W as a USB HID keyboard.
 
 ```
