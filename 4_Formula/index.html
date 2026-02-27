@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>4 Formula — Logitext</title>
+  <link rel="stylesheet" href="../shared.css" />
+</head>
+<body>
+<div id="debug-bar"></div>
+<nav>
+  <a class="nav-brand" href="../index.html">⌨️ Logitext</a>
+  <div class="nav-links" id="content-nav"></div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="search-wrap"><input id="search-input" type="text" placeholder="🔍 Search..." autocomplete="off" /><div id="search-dropdown"></div></div>
+    <button id="debug-toggle">🐛</button>
+  </div>
+</nav>
+<main class="content">
+  <div class="stage-header">
+    <div class="stage-badge">Stage 4 · The Recipe</div>
+    <h1>📐 Formula</h1>
+    <p>Step-by-step guides and the logic behind each build decision.</p>
+  </div>
+
+  <section class="card-section">
+    <h2>📚 Guides</h2>
+    <div class="link-grid">
+      <a class="link-card" href="../markdown_renderer.html?file=4_Formula/FLASH_FORMULA.md">
+        <div class="link-icon">⚡</div>
+        <div><strong>Flash Firmware</strong><p>Full guide to flashing CircuitPython 10.1.3 onto the Pico 2 W</p></div>
+      </a>
+      <a class="link-card" href="../markdown_renderer.html?file=4_Formula/formula_wifi_switch.md">
+        <div class="link-icon">📡</div>
+        <div><strong>WiFi Switch Setup</strong><p>Configuring WiFi credentials and switching between networks</p></div>
+      </a>
+      <a class="link-card" href="../markdown_renderer.html?file=4_Formula/formula_keyboard_use.md">
+        <div class="link-icon">⌨️</div>
+        <div><strong>Keyboard Use</strong><p>How the USB HID keyboard emulation works</p></div>
+      </a>
+      <a class="link-card" href="../markdown_renderer.html?file=4_Formula/BLUETOOTH_HID_FORMULA.md">
+        <div class="link-icon">🔵</div>
+        <div><strong>Bluetooth HID</strong><p>BLE HID formula (currently blocked on CircuitPython 10.x)</p></div>
+      </a>
+      <a class="link-card" href="../markdown_renderer.html?file=4_Formula/BLUETOOTH_CONNECT_GUIDE.md">
+        <div class="link-icon">🔗</div>
+        <div><strong>Bluetooth Connect</strong><p>Pairing and connection guide for BLE</p></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="card-section">
+    <h2>🔑 Quick Reference</h2>
+    <pre># Flash firmware
+# 1. Hold BOOTSEL → plug Pico into Mac
+# 2. Copy .uf2 to RPI-RP2 drive
+# 3. Pico reboots as CIRCUITPY
+
+# Configure WiFi (CIRCUITPY/settings.toml)
+CIRCUITPY_WIFI_SSID = "YourNetwork_2.4GHz"
+CIRCUITPY_WIFI_PASSWORD = "yourpassword"
+
+# Deploy code
+cp code.py /Volumes/CIRCUITPY/code.py
+
+# Send text from Mac
+python3 send_wifi.py "hello world"
+
+# Send clipboard
+python3 send_wifi.py --clip</pre>
+  </section>
+</main>
+<script src="../shared.js"></script>
+</body>
+</html>

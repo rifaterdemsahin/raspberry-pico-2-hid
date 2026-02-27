@@ -1,0 +1,21 @@
+{
+  "debug_menu": [
+    { "label": "1 Real Unknown", "url": "1_Real_Unknown/index.html", "icon": "🔍" },
+    { "label": "2 Environment", "url": "2_Environment/index.html", "icon": "🌍" },
+    { "label": "3 Simulation", "url": "3_Simulation/index.html", "icon": "🎨" },
+    { "label": "4 Formula", "url": "4_Formula/index.html", "icon": "📐" },
+    { "label": "5 Symbols", "url": "5_Symbols/index.html", "icon": "💻" },
+    { "label": "6 Semblance", "url": "6_Semblance/index.html", "icon": "🐛" },
+    { "label": "7 Testing", "url": "7_Testing_Known/index.html", "icon": "🧪" }
+  ],
+  "content_menu": [
+    { "label": "Project Overview", "url": "index.html", "icon": "🏠" },
+    { "label": "Flash Firmware", "url": "4_Formula/FLASH_FORMULA.md", "icon": "⚡" },
+    { "label": "WiFi HID Setup", "url": "4_Formula/formula_wifi_switch.md", "icon": "📡" },
+    { "label": "Keyboard Use", "url": "4_Formula/formula_keyboard_use.md", "icon": "⌨️" },
+    { "label": "Bluetooth Guide", "url": "4_Formula/BLUETOOTH_HID_FORMULA.md", "icon": "🔵" },
+    { "label": "Source Code", "url": "5_Symbols/index.html", "icon": "📝" },
+    { "label": "Error Log", "url": "6_Semblance/semblance.md", "icon": "⚠️" },
+    { "label": "UF2 Issues", "url": "6_Semblance/semblance_uf2.md", "icon": "🔧" }
+  ]
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>1 Real Unknown — Logitext</title>
+  <link rel="stylesheet" href="../shared.css" />
+</head>
+<body>
+<div id="debug-bar"></div>
+<nav>
+  <a class="nav-brand" href="../index.html">⌨️ Logitext</a>
+  <div class="nav-links" id="content-nav"></div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="search-wrap"><input id="search-input" type="text" placeholder="🔍 Search..." autocomplete="off" /><div id="search-dropdown"></div></div>
+    <button id="debug-toggle">🐛</button>
+  </div>
+</nav>
+<main class="content">
+  <div class="stage-header">
+    <div class="stage-badge">Stage 1 · The Why</div>
+    <h1>🔍 Real Unknown</h1>
+    <p>The core problems, OKRs, and questions that drive this project.</p>
+  </div>
+
+  <section class="card-section">
+    <h2>🎯 Objective</h2>
+    <p>Use a Raspberry Pi Pico 2 W as a wireless USB HID keyboard bridge — send keystrokes from a Mac to a Windows PC without installing any software on Windows.</p>
+  </section>
+
+  <section class="card-section">
+    <h2>❓ Core Questions</h2>
+    <ul>
+      <li>Can a Pico 2 W act as a USB HID keyboard while simultaneously connected to WiFi?</li>
+      <li>What firmware (CircuitPython vs MicroPython) supports both USB HID and WiFi?</li>
+      <li>Can we send arbitrary text from Mac to Windows PC reliably over HTTP?</li>
+      <li>What is the latency of the WiFi→HID path?</li>
+      <li>Can Bluetooth HID replace WiFi for a wireless-only setup?</li>
+    </ul>
+  </section>
+
+  <section class="card-section">
+    <h2>📋 OKRs</h2>
+    <table>
+      <thead><tr><th>Objective</th><th>Key Result</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>WiFi HID Bridge</td><td>Mac sends text → Windows types it within 2s</td><td>✅ Done</td></tr>
+        <tr><td>Zero Windows config</td><td>No drivers or software installed on Windows PC</td><td>✅ Done</td></tr>
+        <tr><td>Reliable HTTP transport</td><td>&gt;95% of sends succeed without retry</td><td>✅ Done</td></tr>
+        <tr><td>BLE HID fallback</td><td>Bluetooth HID works on CircuitPython 10.x</td><td>❌ Blocked (BLE broken on Pico 2 W)</td></tr>
+        <tr><td>Clipboard integration</td><td>--clip flag sends Mac clipboard content</td><td>✅ Done</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card-section">
+    <h2>🔍 Known Unknowns at Start</h2>
+    <ul>
+      <li>Whether CircuitPython 10.x BLE adapter initializes on Pico 2 W (CYW43439)</li>
+      <li>Whether the 2.4GHz-only WiFi chip causes issues on a 5GHz network</li>
+      <li>Whether USB HID + WiFi can run concurrently without USB enumeration failure</li>
+      <li>How to handle TCP packet fragmentation in the raw HTTP server</li>
+    </ul>
+  </section>
+
+  <section class="card-section">
+    <h2>🗺️ Journey Map</h2>
+    <pre>Unknown ──► Environment ──► Simulation ──► Formula ──► Symbols ──► Semblance ──► Proven</pre>
+  </section>
+</main>
+<script src="../shared.js"></script>
+</body>
+</html>

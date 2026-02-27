@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>7 Testing Known — Logitext</title>
+  <link rel="stylesheet" href="../shared.css" />
+  <style>
+    .checklist li { list-style: none; padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .checklist li:last-child { border-bottom: none; }
+    .checklist li input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent2); }
+    .checklist li.done { color: var(--muted); text-decoration: line-through; }
+    .progress-bar { height: 8px; background: var(--border); border-radius: 4px; margin: 12px 0; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent2); border-radius: 4px; transition: width 0.3s; }
+    .yt-embed { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 10px; margin-bottom: 20px; }
+    .yt-embed iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+  </style>
+</head>
+<body>
+<div id="debug-bar"></div>
+<nav>
+  <a class="nav-brand" href="../index.html">⌨️ Logitext</a>
+  <div class="nav-links" id="content-nav"></div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="search-wrap"><input id="search-input" type="text" placeholder="🔍 Search..." autocomplete="off" /><div id="search-dropdown"></div></div>
+    <button id="debug-toggle">🐛</button>
+  </div>
+</nav>
+<main class="content">
+  <div class="stage-header">
+    <div class="stage-badge">Stage 7 · The Proof</div>
+    <h1>🧪 Testing Known</h1>
+    <p>Validation against OKRs, interactive testing checklists, and outcome confirmation.</p>
+  </div>
+
+  <section class="card-section">
+    <h2>📺 Reference Video</h2>
+    <div class="yt-embed">
+      <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0" allowfullscreen title="Raspberry Pi Pico HID Demo"></iframe>
+    </div>
+    <p style="color:var(--muted);font-size:0.8rem;">Replace with actual demo video URL for this project</p>
+  </section>
+
+  <section class="card-section">
+    <h2>✅ WiFi HID Checklist</h2>
+    <div class="progress-bar"><div class="progress-fill" id="prog1"></div></div>
+    <ul class="checklist" id="list1">
+      <li><input type="checkbox" /> Pico 2 W powered on and connected to 2.4GHz WiFi</li>
+      <li><input type="checkbox" /> IP address printed to serial: <code>IP: 192.168.x.x</code></li>
+      <li><input type="checkbox" /> Pico plugged into Windows PC via USB</li>
+      <li><input type="checkbox" /> Windows recognizes Pico as HID keyboard (Device Manager)</li>
+      <li><input type="checkbox" /> <code>python3 send_wifi.py "test"</code> succeeds from Mac</li>
+      <li><input type="checkbox" /> "test" appears typed on Windows PC</li>
+      <li><input type="checkbox" /> <code>python3 send_wifi.py --clip</code> sends clipboard content</li>
+      <li><input type="checkbox" /> Special chars (enter, space, symbols) typed correctly</li>
+    </ul>
+  </section>
+
+  <section class="card-section">
+    <h2>🔧 Firmware Checklist</h2>
+    <div class="progress-bar"><div class="progress-fill" id="prog2"></div></div>
+    <ul class="checklist" id="list2">
+      <li><input type="checkbox" /> CircuitPython 10.1.3 flashed successfully</li>
+      <li><input type="checkbox" /> CIRCUITPY drive mounts on Mac</li>
+      <li><input type="checkbox" /> <code>settings.toml</code> has correct 2.4GHz SSID</li>
+      <li><input type="checkbox" /> <code>adafruit_hid/</code> copied to CIRCUITPY/lib/</li>
+      <li><input type="checkbox" /> <code>code.py</code> deployed and auto-runs on boot</li>
+    </ul>
+  </section>
+
+  <section class="card-section">
+    <h2>🎯 OKR Validation</h2>
+    <table>
+      <thead><tr><th>OKR</th><th>Result</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>WiFi HID Bridge</td><td>✅ PASS</td><td>Text typed on Windows within ~1s</td></tr>
+        <tr><td>Zero Windows config</td><td>✅ PASS</td><td>No drivers installed, pure USB HID</td></tr>
+        <tr><td>Reliable HTTP transport</td><td>✅ PASS</td><td>TCP body accumulation fix deployed</td></tr>
+        <tr><td>BLE HID fallback</td><td>❌ BLOCKED</td><td>adafruit_ble broken on CP 10.1.3 / CYW43439</td></tr>
+        <tr><td>Clipboard integration</td><td>✅ PASS</td><td>--clip flag working</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+function initChecklist(listId, progId) {
+  const list = document.getElementById(listId);
+  const prog = document.getElementById(progId);
+  const items = list.querySelectorAll('li');
+  const key = 'checklist_' + listId;
+
+  // Load saved state
+  const saved = JSON.parse(localStorage.getItem(key) || '{}');
+  items.forEach((li, i) => {
+    const cb = li.querySelector('input');
+    cb.checked = saved[i] || false;
+    li.classList.toggle('done', cb.checked);
+  });
+
+  function updateProgress() {
+    const total = items.length;
+    const done = list.querySelectorAll('input:checked').length;
+    prog.style.width = (done / total * 100) + '%';
+    const state = {};
+    items.forEach((li, i) => { state[i] = li.querySelector('input').checked; });
+    localStorage.setItem(key, JSON.stringify(state));
+  }
+
+  items.forEach((li, i) => {
+    li.addEventListener('click', e => {
+      if (e.target.tagName !== 'INPUT') li.querySelector('input').click();
+      li.classList.toggle('done', li.querySelector('input').checked);
+      updateProgress();
+    });
+  });
+  updateProgress();
+}
+
+initChecklist('list1', 'prog1');
+initChecklist('list2', 'prog2');
+</script>
+<script src="../shared.js"></script>
+</body>
+</html>

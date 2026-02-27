@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>5 Symbols — Logitext</title>
+  <link rel="stylesheet" href="../shared.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
+</head>
+<body>
+<div id="debug-bar"></div>
+<nav>
+  <a class="nav-brand" href="../index.html">⌨️ Logitext</a>
+  <div class="nav-links" id="content-nav"></div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="search-wrap"><input id="search-input" type="text" placeholder="🔍 Search..." autocomplete="off" /><div id="search-dropdown"></div></div>
+    <button id="debug-toggle">🐛</button>
+  </div>
+</nav>
+<main class="content">
+  <div class="stage-header">
+    <div class="stage-badge">Stage 5 · The Reality</div>
+    <h1>💻 Symbols</h1>
+    <p>Core source code — the actual implementation that makes it work.</p>
+  </div>
+
+  <section class="card-section">
+    <h2>📁 Source Files</h2>
+    <div class="link-grid">
+      <a class="link-card" href="#code-py">
+        <div class="link-icon">🐍</div>
+        <div><strong>code.py</strong><p>CircuitPython firmware — HTTP server + USB HID</p></div>
+      </a>
+      <a class="link-card" href="#send-wifi">
+        <div class="link-icon">📡</div>
+        <div><strong>send_wifi.py</strong><p>Mac script to send text to Pico over WiFi</p></div>
+      </a>
+      <a class="link-card" href="#send-ble">
+        <div class="link-icon">🔵</div>
+        <div><strong>send_ble.py</strong><p>BLE sender script (MicroPython only)</p></div>
+      </a>
+      <a class="link-card" href="#send-serial">
+        <div class="link-icon">🔌</div>
+        <div><strong>send.py</strong><p>USB serial sender (MicroPython only)</p></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="card-section" id="code-py">
+    <h2>🐍 code.py — Pico Firmware</h2>
+    <div id="code-py-content"><em>Loading...</em></div>
+  </section>
+
+  <section class="card-section" id="send-wifi">
+    <h2>📡 send_wifi.py — Mac Sender</h2>
+    <div id="send-wifi-content"><em>Loading...</em></div>
+  </section>
+</main>
+
+<script>
+async function loadCode(url, targetId) {
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    const el = document.getElementById(targetId);
+    el.innerHTML = `<pre><code class="language-python">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></pre>`;
+    Prism.highlightAllUnder(el);
+  } catch(e) {
+    document.getElementById(targetId).innerHTML = `<p class="error">Could not load ${url}</p>`;
+  }
+}
+loadCode('code.py', 'code-py-content');
+loadCode('send_wifi.py', 'send-wifi-content');
+</script>
+<script src="../shared.js"></script>
+</body>
+</html>

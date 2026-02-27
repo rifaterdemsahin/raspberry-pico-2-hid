@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Renderer — Logitext</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.min.css" />
+  <style>
+    :root {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d;
+      --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+      --accent2: #3fb950; --warn: #e3b341; --debug-bg: #1a1f2e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+    /* Debug bar */
+    #debug-bar { display: none; background: var(--debug-bg); border-bottom: 2px solid var(--warn); padding: 8px 16px; font-size: 0.8rem; }
+    #debug-bar.visible { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    #debug-bar a { color: var(--warn); text-decoration: none; padding: 3px 8px; border: 1px solid var(--warn); border-radius: 4px; }
+    #debug-bar a:hover { background: var(--warn); color: #000; }
+
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 56px;
+    }
+    .nav-brand { font-weight: 700; font-size: 1.1rem; color: var(--accent); text-decoration: none; }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 4px; }
+    .nav-links a { color: var(--text); text-decoration: none; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; transition: background 0.15s; }
+    .nav-links a:hover { background: var(--border); color: var(--accent); }
+    .search-wrap { position: relative; }
+    #search-input { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; width: 180px; outline: none; }
+    #search-input:focus { border-color: var(--accent); }
+    #search-dropdown { display: none; position: absolute; top: calc(100% + 4px); left: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; min-width: 240px; z-index: 999; overflow: hidden; }
+    #search-dropdown.open { display: block; }
+    #search-dropdown a { display: flex; align-items: center; gap: 8px; padding: 9px 14px; color: var(--text); text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid var(--border); }
+    #search-dropdown a:last-child { border-bottom: none; }
+    #search-dropdown a:hover, #search-dropdown a.active { background: var(--border); color: var(--accent); }
+    #debug-toggle { background: none; border: 1px solid var(--warn); color: var(--warn); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
+    #debug-toggle:hover { background: var(--warn); color: #000; }
+
+    /* Toolbar */
+    .toolbar {
+      max-width: 900px;
+      margin: 20px auto 0;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .toolbar input[type=text] {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .toolbar input[type=text]:focus { border-color: var(--accent); }
+    .toolbar button {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .toolbar button:hover { opacity: 0.85; }
+    #file-title { color: var(--muted); font-size: 0.85rem; }
+
+    /* Markdown content */
+    #md-output {
+      max-width: 900px;
+      margin: 24px auto 60px;
+      padding: 32px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      line-height: 1.7;
+    }
+    #md-output h1, #md-output h2, #md-output h3, #md-output h4 { color: var(--accent); margin: 1.4em 0 0.5em; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    #md-output h1 { font-size: 1.8rem; }
+    #md-output h2 { font-size: 1.4rem; }
+    #md-output h3 { font-size: 1.15rem; }
+    #md-output p { margin-bottom: 1em; }
+    #md-output a { color: var(--accent); }
+    #md-output code { background: #0d1117; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em; color: var(--accent2); }
+    #md-output pre { background: #0d1117; border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin-bottom: 1.2em; }
+    #md-output pre code { background: none; padding: 0; color: inherit; }
+    #md-output blockquote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--muted); margin-bottom: 1em; }
+    #md-output ul, #md-output ol { margin: 0 0 1em 1.5em; }
+    #md-output li { margin-bottom: 4px; }
+    #md-output table { border-collapse: collapse; width: 100%; margin-bottom: 1em; }
+    #md-output th, #md-output td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    #md-output th { background: var(--bg); color: var(--accent); }
+    #md-output img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
+    #md-output hr { border: none; border-top: 1px solid var(--border); margin: 1.5em 0; }
+
+    .error { color: #f85149; padding: 16px; background: #2d1a1a; border-radius: 8px; border: 1px solid #f85149; }
+    .placeholder { text-align: center; padding: 60px 24px; color: var(--muted); }
+    .placeholder .big { font-size: 3rem; margin-bottom: 12px; }
+
+    @media (max-width: 600px) {
+      #md-output { padding: 16px 14px; }
+      .toolbar { gap: 8px; }
+      #search-input { width: 120px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="debug-bar"></div>
+
+<nav>
+  <a class="nav-brand" href="index.html">⌨️ Logitext</a>
+  <div class="nav-links" id="content-nav"></div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="search-wrap">
+      <input id="search-input" type="text" placeholder="🔍 Search..." autocomplete="off" />
+      <div id="search-dropdown"></div>
+    </div>
+    <button id="debug-toggle">🐛</button>
+  </div>
+</nav>
+
+<div class="toolbar">
+  <input id="file-input" type="text" placeholder="Enter path e.g. 4_Formula/FLASH_FORMULA.md" />
+  <button onclick="loadFromInput()">Load</button>
+  <span id="file-title"></span>
+</div>
+
+<div id="md-output">
+  <div class="placeholder">
+    <div class="big">📝</div>
+    <p>Enter a markdown file path above or use ?file= in the URL to render any .md file.</p>
+    <p style="margin-top:8px;font-size:0.8rem;">Example: <code>markdown_renderer.html?file=4_Formula/FLASH_FORMULA.md</code></p>
+  </div>
+</div>
+
+<script>
+let ALL_ITEMS = [];
+
+async function loadMenus() {
+  try {
+    const res = await fetch('menus.json');
+    const data = await res.json();
+    buildDebugBar(data.debug_menu);
+    buildContentNav(data.content_menu);
+    ALL_ITEMS = [...data.debug_menu, ...data.content_menu];
+    initSearch();
+  } catch (e) { console.warn('menus.json not found', e); }
+}
+
+function buildDebugBar(items) {
+  const bar = document.getElementById('debug-bar');
+  const label = document.createElement('span');
+  label.style = 'color:var(--muted);font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;margin-right:4px;';
+  label.textContent = '🐛 Debug';
+  bar.appendChild(label);
+  items.forEach(item => {
+    const a = document.createElement('a');
+    a.href = item.url;
+    a.textContent = item.icon + ' ' + item.label;
+    bar.appendChild(a);
+  });
+  const md = document.createElement('a');
+  md.href = 'markdown_renderer.html';
+  md.textContent = '📝 MD Renderer';
+  bar.appendChild(md);
+}
+
+function buildContentNav(items) {
+  const nav = document.getElementById('content-nav');
+  items.forEach(item => {
+    const a = document.createElement('a');
+    a.href = item.url.endsWith('.md')
+      ? 'markdown_renderer.html?file=' + encodeURIComponent(item.url)
+      : item.url;
+    a.textContent = item.icon + ' ' + item.label;
+    nav.appendChild(a);
+  });
+}
+
+function initSearch() {
+  const input = document.getElementById('search-input');
+  const dropdown = document.getElementById('search-dropdown');
+  let activeIdx = -1;
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    dropdown.innerHTML = '';
+    activeIdx = -1;
+    if (!q) { dropdown.classList.remove('open'); return; }
+    const matches = ALL_ITEMS.filter(i => i.label.toLowerCase().includes(q)).slice(0, 8);
+    if (!matches.length) { dropdown.classList.remove('open'); return; }
+    matches.forEach((item) => {
+      const a = document.createElement('a');
+      a.href = item.url.endsWith('.md')
+        ? 'markdown_renderer.html?file=' + encodeURIComponent(item.url)
+        : item.url;
+      a.innerHTML = `<span>${item.icon || '📄'}</span>${item.label}`;
+      dropdown.appendChild(a);
+    });
+    dropdown.classList.add('open');
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-wrap')) dropdown.classList.remove('open');
+  });
+}
+
+function initDebug() {
+  const btn = document.getElementById('debug-toggle');
+  const bar = document.getElementById('debug-bar');
+  const isDebug = document.cookie.split(';').some(c => c.trim() === 'debug=true')
+    || new URLSearchParams(location.search).get('debug') === 'true';
+  if (isDebug) { bar.classList.add('visible'); document.cookie = 'debug=true; path=/; max-age=86400'; }
+  btn.addEventListener('click', () => {
+    const active = bar.classList.toggle('visible');
+    document.cookie = `debug=${active}; path=/; max-age=86400`;
+  });
+}
+
+async function renderMarkdown(filepath) {
+  const output = document.getElementById('md-output');
+  const title = document.getElementById('file-title');
+  document.getElementById('file-input').value = filepath;
+  title.textContent = '📄 ' + filepath;
+  try {
+    const res = await fetch(filepath);
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${filepath}`);
+    const text = await res.text();
+    output.innerHTML = marked.parse(text);
+    Prism.highlightAllUnder(output);
+  } catch (e) {
+    output.innerHTML = `<div class="error">❌ Could not load <strong>${filepath}</strong><br><small>${e.message}</small></div>`;
+  }
+}
+
+function loadFromInput() {
+  const val = document.getElementById('file-input').value.trim();
+  if (!val) return;
+  const url = new URL(location.href);
+  url.searchParams.set('file', val);
+  history.pushState({}, '', url);
+  renderMarkdown(val);
+}
+
+// Handle URL param
+const params = new URLSearchParams(location.search);
+const fileParam = params.get('file');
+if (fileParam) renderMarkdown(decodeURIComponent(fileParam));
+
+initDebug();
+loadMenus();
+
+// Allow Enter key in input
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('file-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') loadFromInput();
+  });
+});
+</script>
+</body>
+</html>

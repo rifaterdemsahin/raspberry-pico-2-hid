@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>3 Simulation — Logitext</title>
+  <link rel="stylesheet" href="../shared.css" />
+  <style>
+    .carousel {
+      position: relative;
+      max-width: 860px;
+      margin: 24px auto;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .slides { display: flex; transition: transform 0.4s ease; }
+    .slide { min-width: 100%; }
+    .slide img { width: 100%; max-height: 480px; object-fit: contain; background: #000; }
+    .slide-caption { padding: 12px 16px; color: var(--muted); font-size: 0.85rem; text-align: center; }
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .carousel-btn:hover { background: rgba(0,0,0,0.85); }
+    .carousel-btn.prev { left: 12px; }
+    .carousel-btn.next { right: 12px; }
+    .dots { display: flex; justify-content: center; gap: 8px; padding: 12px 0; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; transition: background 0.2s; }
+    .dot.active { background: var(--accent); }
+    .counter { position: absolute; top: 12px; right: 16px; background: rgba(0,0,0,0.6); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+<div id="debug-bar"></div>
+<nav>
+  <a class="nav-brand" href="../index.html">⌨️ Logitext</a>
+  <div class="nav-links" id="content-nav"></div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="search-wrap"><input id="search-input" type="text" placeholder="🔍 Search..." autocomplete="off" /><div id="search-dropdown"></div></div>
+    <button id="debug-toggle">🐛</button>
+  </div>
+</nav>
+<main class="content">
+  <div class="stage-header">
+    <div class="stage-badge">Stage 3 · The Vision</div>
+    <h1>🎨 Simulation</h1>
+    <p>Visual mockups and real photos from the physical setup.</p>
+  </div>
+
+  <section class="card-section">
+    <h2>🖼️ Setup Gallery</h2>
+    <div class="carousel" id="carousel">
+      <div class="slides" id="slides"></div>
+      <div class="counter" id="counter"></div>
+      <button class="carousel-btn prev" onclick="move(-1)">‹</button>
+      <button class="carousel-btn next" onclick="move(1)">›</button>
+    </div>
+    <div class="dots" id="dots"></div>
+  </section>
+
+  <section class="card-section">
+    <h2>📐 Architecture Diagram</h2>
+    <pre style="text-align:center;font-size:1.1rem;padding:20px;">
+┌──────────┐   HTTP POST    ┌─────────────┐   USB HID   ┌──────────────┐
+│  Mac     │ ─────────────► │  Pico 2 W   │ ───────────► │  Windows PC  │
+│ send_    │   WiFi 2.4GHz  │  code.py    │  keyboard   │  (no SW)     │
+│ wifi.py  │                │  port 80    │             │              │
+└──────────┘                └─────────────┘             └──────────────┘
+                                   │
+                            CircuitPython
+                            10.1.3 + HID lib
+    </pre>
+  </section>
+
+  <section class="card-section">
+    <h2>🎬 Flow Walkthrough</h2>
+    <ol>
+      <li>Pico powers on → connects to 2.4GHz WiFi → prints IP to serial</li>
+      <li>USB cable plugs Pico into Windows PC → Windows sees a USB keyboard</li>
+      <li>Mac runs: <code>python3 send_wifi.py "hello world"</code></li>
+      <li>send_wifi.py sends HTTP POST to <code>http://&lt;pico-ip&gt;/type</code></li>
+      <li>Pico receives, URL-decodes, types each character via adafruit_hid</li>
+      <li>Windows PC sees keystrokes — text appears in focused app</li>
+    </ol>
+  </section>
+</main>
+
+<script>
+// Dynamic carousel — reads images directory listing
+const IMAGES = [
+  { src: 'images/side-by-side-agent-ctrld-pico.png', caption: '🖥️ Side-by-side: Claude agent + Pico terminal' },
+  { src: 'images/pico-program-over-claude.png', caption: '🤖 Programming Pico via Claude Code' },
+  { src: 'images/press_ctrl_d.png', caption: '⌨️ Press Ctrl+D to reload CircuitPython' },
+  { src: 'images/pic0-ctrl-d.png', caption: '📟 Serial output after Ctrl+D' },
+  { src: 'images/sending_keys_over_python.png', caption: '🐍 Sending keystrokes from Python script' },
+  { src: 'images/ada-fruit-libraries.png', caption: '📦 Adafruit libraries on CIRCUITPY drive' },
+  { src: 'images/step1_WhatsApp Image 2026-02-27 at 14.41.36.jpeg', caption: '📸 Physical hardware setup — Step 1' },
+];
+
+let current = 0;
+const slides = document.getElementById('slides');
+const dotsEl = document.getElementById('dots');
+const counter = document.getElementById('counter');
+
+function build() {
+  IMAGES.forEach((img, i) => {
+    const div = document.createElement('div');
+    div.className = 'slide';
+    div.innerHTML = `<img src="${img.src}" alt="${img.caption}" loading="lazy" onerror="this.style.display='none'" /><div class="slide-caption">${img.caption}</div>`;
+    slides.appendChild(div);
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    dotsEl.appendChild(dot);
+  });
+  update();
+}
+
+function update() {
+  slides.style.transform = `translateX(-${current * 100}%)`;
+  dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  counter.textContent = `${current + 1} / ${IMAGES.length}`;
+}
+
+function move(dir) { current = (current + dir + IMAGES.length) % IMAGES.length; update(); }
+function goTo(i) { current = i; update(); }
+
+// Auto-advance every 5s
+setInterval(() => move(1), 5000);
+build();
+</script>
+<script src="../shared.js"></script>
+</body>
+</html>

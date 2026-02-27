@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>6 Semblance — Logitext</title>
+  <link rel="stylesheet" href="../shared.css" />
+</head>
+<body>
+<div id="debug-bar"></div>
+<nav>
+  <a class="nav-brand" href="../index.html">⌨️ Logitext</a>
+  <div class="nav-links" id="content-nav"></div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="search-wrap"><input id="search-input" type="text" placeholder="🔍 Search..." autocomplete="off" /><div id="search-dropdown"></div></div>
+    <button id="debug-toggle">🐛</button>
+  </div>
+</nav>
+<main class="content">
+  <div class="stage-header">
+    <div class="stage-badge">Stage 6 · The Scars</div>
+    <h1>🐛 Semblance</h1>
+    <p>Error logs, near-misses, workarounds — the gap between plan and reality.</p>
+  </div>
+
+  <section class="card-section">
+    <h2>📋 Error Logs</h2>
+    <div class="link-grid">
+      <a class="link-card" href="../markdown_renderer.html?file=6_Semblance/semblance.md">
+        <div class="link-icon">⚠️</div>
+        <div><strong>Main Error Log</strong><p>WiFi issues, HID failures, TCP fragmentation, and their fixes</p></div>
+      </a>
+      <a class="link-card" href="../markdown_renderer.html?file=6_Semblance/semblance_uf2.md">
+        <div class="link-icon">🔧</div>
+        <div><strong>UF2 Flash Issues</strong><p>Firmware flashing problems and workarounds</p></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="card-section">
+    <h2>💀 Top 5 Hardest Problems</h2>
+    <ol>
+      <li><strong>BLE adapter never initializes</strong> — CircuitPython 10.1.3 BLE is broken on Pico 2 W. Workaround: WiFi instead.</li>
+      <li><strong>5GHz WiFi SSID</strong> — CYW43439 is 2.4GHz only. Had <code>_5G</code> in SSID. Fixed by using 2.4GHz SSID.</li>
+      <li><strong>TCP packet fragmentation</strong> — HTTP POST body arrived in separate TCP segment, server read only headers. Fixed by accumulating until Content-Length satisfied.</li>
+      <li><strong>USB serial port busy</strong> — Mac mpremote / Thonny holding serial port. Fixed with <code>lsof + kill</code>.</li>
+      <li><strong>MicroPython no usb module</strong> — MicroPython 1.27.0 on RP2350 has no USB HID. Had to switch to CircuitPython entirely.</li>
+    </ol>
+  </section>
+
+  <section class="card-section">
+    <h2>🗑️ Obsolete Approaches</h2>
+    <ul>
+      <li>BLE HID via adafruit_ble — abandoned (broken on CYW43439 in CP 10.x)</li>
+      <li>MicroPython USB HID — no module available on RP2350</li>
+      <li>USB serial pipe (send.py) — replaced by WiFi approach</li>
+    </ul>
+  </section>
+</main>
+<script src="../shared.js"></script>
+</body>
+</html>

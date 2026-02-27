@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>2 Environment — Logitext</title>
+  <link rel="stylesheet" href="../shared.css" />
+</head>
+<body>
+<div id="debug-bar"></div>
+<nav>
+  <a class="nav-brand" href="../index.html">⌨️ Logitext</a>
+  <div class="nav-links" id="content-nav"></div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="search-wrap"><input id="search-input" type="text" placeholder="🔍 Search..." autocomplete="off" /><div id="search-dropdown"></div></div>
+    <button id="debug-toggle">🐛</button>
+  </div>
+</nav>
+<main class="content">
+  <div class="stage-header">
+    <div class="stage-badge">Stage 2 · The Context</div>
+    <h1>🌍 Environment</h1>
+    <p>Hardware constraints, network setup, and platform context.</p>
+  </div>
+
+  <section class="card-section">
+    <h2>🖥️ Hardware Stack</h2>
+    <table>
+      <thead><tr><th>Component</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td>Pico Board</td><td>Raspberry Pi Pico 2 W — RP2350 + CYW43439 (WiFi 2.4GHz + BT 5.2)</td></tr>
+        <tr><td>Host (Sender)</td><td>MacBook Pro — macOS, Python 3</td></tr>
+        <tr><td>Target (Receiver)</td><td>Windows PC — USB HID keyboard target</td></tr>
+        <tr><td>Network</td><td>WiFi 2.4GHz (CYW43439 is 2.4GHz-only — 5GHz not supported)</td></tr>
+        <tr><td>USB</td><td>Pico → Windows via USB cable (HID enumeration)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card-section">
+    <h2>⚙️ Firmware Landscape</h2>
+    <table>
+      <thead><tr><th>Firmware</th><th>USB HID</th><th>WiFi</th><th>BLE</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>CircuitPython 10.1.3</td><td>✅</td><td>✅</td><td>❌ Broken</td><td>✅ Use this</td></tr>
+        <tr><td>MicroPython 1.27.0</td><td>❌ No usb module</td><td>✅</td><td>⚠️ Partial</td><td>❌ No HID</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card-section">
+    <h2>📦 Required Libraries (CircuitPython)</h2>
+    <ul>
+      <li><code>adafruit_hid/</code> — USB HID keyboard + keycode</li>
+      <li><code>adafruit_connection_manager</code> — WiFi socket manager</li>
+      <li>Built-in: <code>wifi</code>, <code>socketpool</code>, <code>usb_hid</code></li>
+    </ul>
+  </section>
+
+  <section class="card-section">
+    <h2>🔧 Mac Setup</h2>
+    <pre>brew install python3
+pip3 install pyperclip   # for --clip support</pre>
+  </section>
+
+  <section class="card-section">
+    <h2>📡 Network Constraints</h2>
+    <ul>
+      <li>Pico 2 W CYW43439 is <strong>2.4GHz only</strong> — must use 2.4GHz SSID</li>
+      <li>Mac and Pico must be on the same subnet (same router)</li>
+      <li>Windows PC can be on separate network/VPN — it only connects via USB HID</li>
+      <li>Pico serves HTTP on port 80 — no HTTPS</li>
+    </ul>
+  </section>
+
+  <section class="card-section">
+    <h2>🗂️ Key File Paths</h2>
+    <table>
+      <thead><tr><th>Location</th><th>File</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>CIRCUITPY/</td><td>code.py</td><td>Main firmware</td></tr>
+        <tr><td>CIRCUITPY/</td><td>settings.toml</td><td>WiFi credentials</td></tr>
+        <tr><td>CIRCUITPY/lib/</td><td>adafruit_hid/</td><td>HID library</td></tr>
+        <tr><td>Mac</td><td>send_wifi.py</td><td>Keystroke sender script</td></tr>
+        <tr><td>Mac</td><td>.pico_ip</td><td>Saved Pico IP address</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+<script src="../shared.js"></script>
+</body>
+</html>
