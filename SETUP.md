@@ -73,6 +73,8 @@ The Pico connects to this WiFi network on boot and gets a DHCP IP address.
 | `send_wifi.py` | Send text to Pico over WiFi (Python script) |
 | `Send-ToPico.ps1` | PowerShell wrapper for send_wifi.py |
 | `install-powershell-function.ps1` | Installer for PowerShell global function |
+| `perf_test.py` | Performance testing script with timing logs |
+| `performance.log` | JSON log of performance test results |
 | `code.py` | CircuitPython firmware (runs on Pico) |
 | `settings.toml` | WiFi credentials (on Pico's CIRCUITPY drive) |
 
@@ -104,6 +106,46 @@ python send_wifi.py "test"
 ```
 
 The correct device will respond with `OK` and type the text.
+
+---
+
+## Performance Testing
+
+Test the typing speed and latency of the Pico keyboard:
+
+### Run Performance Test
+```bash
+python perf_test.py --long --auto 45
+```
+
+This will:
+- Send a 375-character test message to the Pico
+- Measure send time, response time, and total completion time
+- Calculate typing speed (chars/second)
+- Log results to `performance.log`
+
+### Manual Testing
+For precise timing, use manual mode:
+```bash
+python perf_test.py --long
+```
+Press ENTER when the Pico finishes typing to record the exact completion time.
+
+### Performance Metrics
+The test measures:
+- **Send Time**: Time to transmit HTTP request to Pico
+- **Response Time**: Time until Pico acknowledges receipt
+- **Total Time**: End-to-end time including all typing
+- **Typing Speed**: Characters per second (based on 0.1s delay per character in code.py)
+
+**Example Results:**
+```
+Text Length:        375 characters
+Send Time:          12.83 ms
+Response Time:      675.48 ms
+Total Time:         45676.71 ms
+Typing Speed:       8.21 chars/sec
+```
 
 ---
 
