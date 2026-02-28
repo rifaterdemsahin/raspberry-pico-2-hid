@@ -29,6 +29,28 @@ This sends text to the Pico, which types it via USB HID.
 python send_wifi.py --clip
 ```
 
+### 4. PowerShell Setup (Windows - Optional)
+
+For convenient access from anywhere in PowerShell, install the global function:
+
+```powershell
+cd C:\projects\raspberry-pico-2-hid
+.\install-powershell-function.ps1
+```
+
+Then reload your profile:
+```powershell
+. $PROFILE
+```
+
+Now you can use from anywhere:
+```powershell
+Send-ToPico "hello world"
+Send-ToPico -Clipboard
+pico "hello world"        # Using alias
+pico -Clipboard           # Using alias
+```
+
 ---
 
 ## Network Configuration
@@ -48,7 +70,9 @@ The Pico connects to this WiFi network on boot and gets a DHCP IP address.
 |------|---------|
 | `find_pico.py` | Network scanner to locate Pico's IP address |
 | `.pico_ip` | Cached IP address (auto-created by find_pico.py) |
-| `send_wifi.py` | Send text to Pico over WiFi |
+| `send_wifi.py` | Send text to Pico over WiFi (Python script) |
+| `Send-ToPico.ps1` | PowerShell wrapper for send_wifi.py |
+| `install-powershell-function.ps1` | Installer for PowerShell global function |
 | `code.py` | CircuitPython firmware (runs on Pico) |
 | `settings.toml` | WiFi credentials (on Pico's CIRCUITPY drive) |
 
